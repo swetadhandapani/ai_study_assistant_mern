@@ -1,4 +1,4 @@
-name: MERN CI 
+name: MERN CI
 
 on:
   push:
@@ -7,9 +7,11 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build-and-test:
+  # -------------------
+  # Backend Job
+  # -------------------
+  backend:
     runs-on: ubuntu-latest
-
     services:
       mongo:
         image: mongo:6
@@ -33,9 +35,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          
 
-      # Backend setup
+      # Cache backend dependencies
+      - name: Cache Backend Dependencies
+        uses: actions/cache@v3
+        with:
+          path: backend/node_modules
+          key: backend-node-${{ hashFiles('backend/package-lock.json') }}
+
       - name: Install Backend Dependencies
         working-directory: ./backend
         run: npm install
@@ -51,7 +58,31 @@ jobs:
           JWT_SECRET: testsecret
         run: npm test --if-present
 
-      # Frontend setup
+  # -------------------
+  # Frontend Job
+  # -------------------
+  frontend:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      # Cache frontend dependencies
+      - name: Cache Frontend Dependencies
+        uses: actions/cache@v3
+        with:
+          path: frontend/node_modules
+          key: frontend-node-${{ hashFiles('frontend/package-lock.json') }}
+
       - name: Install Frontend Dependencies
         working-directory: ./frontend
         run: npm install

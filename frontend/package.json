@@ -5,8 +5,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "vitest run",
-    "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
+    "test": "vitest run"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",

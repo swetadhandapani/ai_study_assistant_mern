@@ -40,6 +40,7 @@ describe("AI Endpoints", () => {
     expect(res.status).toBe(200);
     expect(res.body).toHaveProperty("answer");
     expect(res.body.answer).toContain("Pretend AI answer");
+    console.log(res.body.answer, "AI Response");
   });
 
   // Test: Generate Materials

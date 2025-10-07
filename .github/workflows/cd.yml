@@ -2,14 +2,15 @@ name: MERN CD
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - "main"
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy via SSH
+      - name: Deploy via SSH to AWS EC2
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -17,7 +18,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd ~/ai_study_assistant_mern
-            git reset --hard
-            git pull origin main
+            git fetch origin main
+            git reset --hard origin/main
             docker-compose down
             docker-compose up --build -d

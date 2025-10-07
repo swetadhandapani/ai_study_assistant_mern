@@ -12,11 +12,23 @@ connectDB();
 const app = express();
 
 // CORS
-app.use(cors({
-  origin: process.env.CLIENT_URL,
-  credentials: true,
-}));
+const allowedOrigins = [
+  "http://localhost:3000",         // local dev
+  "http://54.91.27.30:3000",       // AWS frontend
+];
 
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 // ✅ Serve uploads folder with correct cache headers

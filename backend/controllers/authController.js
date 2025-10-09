@@ -589,35 +589,39 @@ exports.updateProfile = async (req, res) => {
   try {
     const { name, role, avatar } = req.body;
     const userId = req.user.id;
-    const BASE_URL =
-      process.env.CLIENT_URL || "https://ai-study-assistant-pumn.onrender.com";
 
     const updateData = {};
     if (name) updateData.name = name;
     if (role) updateData.role = role;
 
+    // ✅ Use relative paths in DB
     if (req.file && req.file.filename) {
-      updateData.avatar = `${BASE_URL}/api/uploads/${req.file.filename}`;
+      updateData.avatar = `/api/uploads/${req.file.filename}`;
     } else if (avatar === null || avatar === "null") {
       updateData.avatar = null;
     } else if (avatar) {
-      updateData.avatar = avatar;
+      updateData.avatar = avatar; // if updating manually
     }
 
     const updatedUser = await User.findByIdAndUpdate(userId, updateData, {
       new: true,
     }).select("-password");
 
-    // Ensure avatar has full URL
-    if (updatedUser.avatar && !updatedUser.avatar.startsWith("http")) {
-      updatedUser.avatar = `${BASE_URL}${updatedUser.avatar}`;
+    // ✅ When sending response, prepend BASE_URL to avatar if needed
+    const BASE_URL =
+      process.env.CLIENT_URL || `http://localhost:${process.env.PORT || 5000}`;
+    const userResponse = updatedUser.toObject();
+    if (userResponse.avatar && !userResponse.avatar.startsWith("http")) {
+      userResponse.avatar = `${BASE_URL}${userResponse.avatar}`;
     }
+
     res.json({
       message: "Profile updated successfully",
-      user: formatUser(updatedUser),
+      user: formatUser(userResponse),
     });
   } catch (err) {
     console.error("Update profile error:", err);
     res.status(500).json({ message: "Update failed", error: err.message });
   }
 };
+

@@ -28,10 +28,12 @@ export default function Profile() {
   if (!userObj) return null;
   let avatar = userObj.avatar;
   if (avatar && !avatar.startsWith("http")) {
-    avatar = `${import.meta.env.VITE_API_URL}${avatar.startsWith("/") ? "" : "/"}${avatar}`;
+    const backendUrl = import.meta.env.VITE_API_URL.replace(/\/$/, "");
+    avatar = `${backendUrl}${avatar.startsWith("/") ? "" : "/"}${avatar}`;
   }
   return { ...userObj, avatar };
 };
+
 
 
   // ---------- Load Profile ----------

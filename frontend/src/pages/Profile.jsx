@@ -24,17 +24,16 @@ export default function Profile() {
   });
 
   // ---------- Normalize avatar helper ----------
- const normalizeAvatar = (userObj) => {
-  if (!userObj) return null;
-  let avatar = userObj.avatar;
-  if (avatar && !avatar.startsWith("http")) {
-    avatar = `${import.meta.env.VITE_API_URL || "http://localhost:5000"}${
-      avatar.startsWith("/") ? "/api/uploads" : "/api/uploads/"
-    }${avatar.split("/").pop()}`; // only filename
-  }
-  return { ...userObj, avatar };
-};
-
+  const normalizeAvatar = (userObj) => {
+    if (!userObj) return null;
+    let avatar = userObj.avatar;
+    if (avatar && !avatar.startsWith("http")) {
+      avatar = `${import.meta.env.VITE_API_URL || "http://localhost:5000"}${
+        avatar.startsWith("/") ? "" : "/"
+      }${avatar}`;
+    }
+    return { ...userObj, avatar };
+  };
 
   // ---------- Load Profile ----------
   useEffect(() => {

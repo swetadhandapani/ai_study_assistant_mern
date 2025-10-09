@@ -11,7 +11,7 @@ if (!fs.existsSync('./uploads')) fs.mkdirSync('./uploads');
 connectDB();
 const app = express();
 
-// ✅ CORS setup (for local + deployed frontend)
+// ✅ CORS setup 
 const allowedOrigins = [
   "http://localhost:3000",
   "http://54.197.28.24:3000",

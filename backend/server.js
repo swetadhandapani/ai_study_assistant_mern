@@ -34,7 +34,7 @@ app.use(
 
 app.use(express.json());
 
-// ✅ Serve uploaded files
+//  Serve uploaded files
 app.use('/api/uploads', express.static(path.join(__dirname, 'uploads'), {
   setHeaders: (res, filePath) => {
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');

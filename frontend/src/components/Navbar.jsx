@@ -18,11 +18,13 @@ const normalizeAvatar = (userObj) => {
   let avatar = userObj.avatar;
   if (avatar && !avatar.startsWith("http")) {
     const backendUrl = import.meta.env.VITE_API_URL.replace(/\/$/, "");
-    avatar = `${backendUrl}${avatar.startsWith("/") ? "" : "/"}${avatar}`;
+    // ✅ Avoid double /api
+    avatar = avatar.startsWith("/api")
+      ? `${backendUrl}${avatar}`
+      : `${backendUrl}/api${avatar.startsWith("/") ? "" : "/"}${avatar}`;
   }
   return { ...userObj, avatar };
 };
-
 
 
   // ✅ Load user on mount

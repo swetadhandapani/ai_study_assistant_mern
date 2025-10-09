@@ -594,23 +594,24 @@ exports.updateProfile = async (req, res) => {
     if (name) updateData.name = name;
     if (role) updateData.role = role;
 
-    // ✅ Use relative paths in DB
+    // ✅ Handle file upload
     if (req.file && req.file.filename) {
       updateData.avatar = `/api/uploads/${req.file.filename}`;
     } else if (avatar === null || avatar === "null") {
       updateData.avatar = null;
     } else if (avatar) {
-      updateData.avatar = avatar; // if updating manually
+      updateData.avatar = avatar;
     }
 
     const updatedUser = await User.findByIdAndUpdate(userId, updateData, {
       new: true,
     }).select("-password");
 
-    // ✅ When sending response, prepend BASE_URL to avatar if needed
-    const BASE_URL =
-      process.env.CLIENT_URL || `http://localhost:${process.env.PORT || 5000}`;
     const userResponse = updatedUser.toObject();
+
+    // ✅ Prepend BACKEND_URL, not CLIENT_URL
+    const BASE_URL =
+      process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 5000}`;
     if (userResponse.avatar && !userResponse.avatar.startsWith("http")) {
       userResponse.avatar = `${BASE_URL}${userResponse.avatar}`;
     }
@@ -624,4 +625,5 @@ exports.updateProfile = async (req, res) => {
     res.status(500).json({ message: "Update failed", error: err.message });
   }
 };
+
 

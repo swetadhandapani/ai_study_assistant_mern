@@ -594,7 +594,6 @@ exports.updateProfile = async (req, res) => {
     if (name) updateData.name = name;
     if (role) updateData.role = role;
 
-    // ✅ Handle file upload
     if (req.file && req.file.filename) {
       updateData.avatar = `/api/uploads/${req.file.filename}`;
     } else if (avatar === null || avatar === "null") {
@@ -609,7 +608,6 @@ exports.updateProfile = async (req, res) => {
 
     const userResponse = updatedUser.toObject();
 
-    // ✅ Prepend BACKEND_URL, not CLIENT_URL
     const BASE_URL =
       process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 5000}`;
     if (userResponse.avatar && !userResponse.avatar.startsWith("http")) {

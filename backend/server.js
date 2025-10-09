@@ -14,8 +14,8 @@ const app = express();
 // ✅ CORS setup (for local + deployed frontend)
 const allowedOrigins = [
   "http://localhost:3000",
-  "http://54.167.116.214:3000",
-  "http://54.167.116.214", // if you serve frontend directly from EC2
+  "http://54.197.28.24:3000",
+  "http://54.197.28.24", // if you serve frontend directly from EC2
   "https://your-domain.com", // optional if you use a custom domain later
 ];
 

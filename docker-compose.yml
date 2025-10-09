@@ -18,6 +18,10 @@ services:
       - ./backend/.env.prod
     depends_on:
       - mongo
+    volumes:
+      - ./backend/uploads:/app/uploads   # ✅ persist uploads
+    environment:
+      - NODE_ENV=production
 
   frontend:
     build: ./frontend
@@ -29,6 +33,21 @@ services:
       - ./frontend/.env.production
     depends_on:
       - backend
+
+  # ✅ Optional: Mongo Express GUI (for viewing DB in browser)
+  mongo-express:
+    image: mongo-express
+    container_name: mongo-express
+    restart: always
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongo
+      ME_CONFIG_MONGODB_ENABLE_ADMIN: "true"
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: password
+    depends_on:
+      - mongo
 
 volumes:
   mongo_data:

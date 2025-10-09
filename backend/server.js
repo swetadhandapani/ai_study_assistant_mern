@@ -5,16 +5,18 @@ const connectDB = require('./config/db');
 const path = require('path');
 const fs = require('fs');
 
-// Ensure uploads directory exists
+// Ensure uploads folder exists
 if (!fs.existsSync('./uploads')) fs.mkdirSync('./uploads');
 
 connectDB();
 const app = express();
 
-// CORS
+// ✅ CORS setup (for local + deployed frontend)
 const allowedOrigins = [
-  "http://localhost:3000",         
-  "http://54.167.116.214:3000",     
+  "http://localhost:3000",
+  "http://54.167.116.214:3000",
+  "http://54.167.116.214", // if you serve frontend directly from EC2
+  "https://your-domain.com", // optional if you use a custom domain later
 ];
 
 app.use(
@@ -29,43 +31,41 @@ app.use(
     credentials: true,
   })
 );
+
 app.use(express.json());
 
-// ✅ Serve uploads folder with correct cache headers
+// ✅ Serve uploaded files
 app.use('/api/uploads', express.static(path.join(__dirname, 'uploads'), {
   setHeaders: (res, filePath) => {
-    // Disable caching for dynamic files like avatars/audio
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-    
-    // Force download for certain file types
     if (/\.(pdf|docx|xlsx|pptx)$/i.test(filePath)) {
       res.setHeader(
         'Content-Disposition',
         `attachment; filename="${path.basename(filePath)}"`
       );
     }
-  }
+  },
 }));
 
-// Routes
+// ✅ Backend API routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/notes', require('./routes/notes'));
 app.use('/api/ai', require('./routes/ai'));
 app.use('/api/audio', require('./routes/audio'));
 
-// ✅ Serve React frontend
-//app.use(express.static(path.join(__dirname, 'public')));
+// ✅ Serve React frontend (after running `npm run build` in frontend)
+app.use(express.static(path.join(__dirname, '../frontend/build')));
 
-// ✅ SPA fallback (React Router)
-//app.get('*', (req, res) => {
- // res.sendFile(path.join(__dirname, 'public', 'index.html'));
-//});
+// ✅ React Router fallback (for Dashboard, Profile, Upload, etc.)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
+});
 
-// ✅ Only listen if not in test mode
+// ✅ Start server
 let server;
 if (process.env.NODE_ENV !== 'test') {
   const PORT = process.env.PORT || 5000;
-  server = app.listen(PORT, () => console.log(`Server listening on ${PORT}`));
+  server = app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
 }
 
 module.exports = { app, server };

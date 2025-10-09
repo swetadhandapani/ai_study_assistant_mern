@@ -13,11 +13,16 @@ import { FiEdit2, FiTrash2, FiEye } from "react-icons/fi";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+// ✅ Use environment variable to handle backend uploads correctly
+const BASE_URL = import.meta.env.VITE_API_URL?.startsWith("http")
+  ? import.meta.env.VITE_API_URL.replace(/\/api$/, "")
+  : window.location.origin;
+
 export default function Dashboard() {
   const [notes, setNotes] = useState([]);
   const [audioNotes, setAudioNotes] = useState([]);
-  const [selected, setSelected] = useState(null); // text note
-  const [selectedAudio, setSelectedAudio] = useState(null); // audio note
+  const [selected, setSelected] = useState(null);
+  const [selectedAudio, setSelectedAudio] = useState(null);
   const [material, setMaterial] = useState({
     summaries: [],
     flashcards: [],
@@ -31,7 +36,6 @@ export default function Dashboard() {
   const [chatOpen, setChatOpen] = useState(false);
   const cardRef = useRef();
 
-  //  Transcript + Translation modal states
   const [openTranscript, setOpenTranscript] = useState(false);
   const [openTranslation, setOpenTranslation] = useState(false);
   const [translationText, setTranslationText] = useState("");
@@ -45,7 +49,11 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (cardRef.current)
-      gsap.fromTo(cardRef.current, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6 });
+      gsap.fromTo(
+        cardRef.current,
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.6 }
+      );
   }, [material, viewMode]);
 
   useEffect(() => {
@@ -109,7 +117,7 @@ export default function Dashboard() {
         });
         setChatOpen(false);
       }
-      toast.success(" Note deleted successfully!");
+      toast.success("🗑️ Note deleted successfully!");
     } catch (err) {
       toast.error(err.response?.data?.message || err.message);
     }
@@ -122,7 +130,7 @@ export default function Dashboard() {
       await api.delete(`/audio/${id}`);
       setAudioNotes((prev) => prev.filter((a) => a._id !== id));
       if (selectedAudio && selectedAudio._id === id) setSelectedAudio(null);
-      toast.success(" Audio note deleted successfully!");
+      toast.success("🎤 Audio note deleted successfully!");
     } catch (err) {
       toast.error(err.response?.data?.message || err.message);
     }
@@ -132,7 +140,7 @@ export default function Dashboard() {
     actions = ["summary", "flashcards", "quiz"],
     mode = "all"
   ) => {
-    const current = selected || selectedAudio; // ✅ support audio or text
+    const current = selected || selectedAudio;
     if (!current) return toast.warning("⚠️ Select a note or audio note first");
 
     setLoading(true);
@@ -141,7 +149,6 @@ export default function Dashboard() {
         noteId: current._id,
         actions,
       });
-
       setMaterial((prev) => ({
         summaries: actions.includes("summary")
           ? res.data.summaries || []
@@ -154,7 +161,6 @@ export default function Dashboard() {
           : prev.quizzes,
         mindmap: prev.mindmap,
       }));
-
       setViewMode(mode);
       toast.success("✨ Study materials generated!");
     } catch {
@@ -165,7 +171,7 @@ export default function Dashboard() {
   };
 
   const generateMindmap = async () => {
-    const current = selected || selectedAudio; // ✅ support audio or text
+    const current = selected || selectedAudio;
     if (!current) return toast.warning("⚠️ Select a note or audio note first");
 
     setLoading(true);
@@ -189,9 +195,9 @@ export default function Dashboard() {
     try {
       const res = await api.post(`/ai/markdown/${current._id}`);
       setMarkdown(res.data.markdown || "");
-      setOpenMarkdown(true); 
+      setOpenMarkdown(true);
       setViewMode("markdown");
-      toast.success(" Markdown generated!");
+      toast.success("📝 Markdown generated!");
     } catch {
       toast.error("⚠️ Failed to generate markdown");
     } finally {
@@ -233,20 +239,22 @@ export default function Dashboard() {
               onClick={() => loadMaterial(n)}
               title={n.title}
             >
-              {/* Title block */}
               <div className="flex-1 min-w-0">
                 <div className="truncate">{n.title}</div>
                 <div className="text-xs truncate">
                   {new Date(n.createdAt).toLocaleString()}
                 </div>
               </div>
-
-              {/* Icons */}
               <div className="flex-shrink-0 flex space-x-2 ml-2">
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    setPreviewNote(n);
+                    setPreviewNote({
+                      ...n,
+                      fileUrl: n.fileUrl?.startsWith("/uploads")
+                        ? `${BASE_URL}${n.fileUrl}`
+                        : n.fileUrl,
+                    });
                   }}
                 >
                   <FiEye size={18} />
@@ -451,8 +459,6 @@ export default function Dashboard() {
               )}
 
               {chatOpen && <Chatbot note={selected} />}
-
-             
             </div>
           </>
         )}

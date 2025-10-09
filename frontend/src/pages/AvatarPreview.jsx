@@ -3,12 +3,23 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Download, ArrowLeft } from "lucide-react";
 import { toast } from "react-toastify";
 
+// --- Compute correct backend base URL (for uploads) ---
+const API_BASE = import.meta.env.VITE_API_URL ;
+const BACKEND_BASE = API_BASE.replace(/\/api$/, ""); // remove /api if present
+
 export default function AvatarPreview() {
   const location = useLocation();
   const navigate = useNavigate();
-  const imageUrl =
+
+  // ✅ Ensure avatar is fully qualified (not localhost blob)
+  const rawAvatar =
     location.state?.avatar || JSON.parse(localStorage.getItem("user"))?.avatar;
   const name = location.state?.name || "profile";
+
+  const imageUrl =
+    rawAvatar && !rawAvatar.startsWith("http")
+      ? `${BACKEND_BASE}${rawAvatar.startsWith("/") ? "" : "/"}${rawAvatar}`
+      : rawAvatar;
 
   if (!imageUrl) {
     return (
@@ -67,6 +78,3 @@ export default function AvatarPreview() {
     </div>
   );
 }
-
-
- 

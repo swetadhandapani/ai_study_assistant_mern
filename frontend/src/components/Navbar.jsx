@@ -12,14 +12,16 @@ export default function Navbar() {
   const userMenuRef = useRef(null);
   const mainMenuRef = useRef(null);
 
+  // ✅ Backend base URL for production
+  const API_BASE = import.meta.env.VITE_API_URL;
+  const UPLOAD_BASE = API_BASE.replace("/api", "");
+
   // ✅ Normalize avatar URL
   const normalizeAvatar = (userObj) => {
     if (!userObj) return null;
     let avatar = userObj.avatar;
     if (avatar && !avatar.startsWith("http")) {
-      avatar = `${import.meta.env.VITE_API_URL || "http://localhost:5000"}${
-        avatar.startsWith("/") ? "" : "/"
-      }${avatar}`;
+      avatar = `${UPLOAD_BASE}${avatar.startsWith("/") ? "" : "/"}${avatar}`;
     }
     return { ...userObj, avatar };
   };
@@ -78,7 +80,7 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [menuOpen]);
 
-  // ✅ Logout clears localStorage and syncs UI
+  // ✅ Logout
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
@@ -95,7 +97,6 @@ export default function Navbar() {
     setTimeout(() => setWarning(null), 5000);
   };
 
-  // ✅ Prevent unverified users from accessing pages
   const handleProtectedClick = (e, page) => {
     if (!user) {
       e.preventDefault();

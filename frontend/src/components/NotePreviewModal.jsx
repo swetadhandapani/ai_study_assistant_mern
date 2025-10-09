@@ -1,31 +1,32 @@
 import React from "react";
 import { FiX } from "react-icons/fi";
 
-const BASE_URL = import.meta.env.VITE_API_URL?.startsWith("http")
-  ? import.meta.env.VITE_API_URL.replace(/\/api$/, "")
-  : window.location.origin;
+// --- Correct backend base URL for file previews ---
+const API_BASE = import.meta.env.VITE_API_URL;
+const BACKEND_BASE = API_BASE.replace(/\/api$/, ""); // remove /api if present
 
 export default function NotePreviewModal({ note, onClose }) {
   if (!note) return null;
 
-  const fileUrl = note.fileUrl ? `${BASE_URL}/api${note.fileUrl}` : null;
+  // ✅ Fix file URL to point to correct uploads location
+  const fileUrl =
+    note.fileUrl && !note.fileUrl.startsWith("http")
+      ? `${BACKEND_BASE}${note.fileUrl.startsWith("/") ? "" : "/"}${note.fileUrl}`
+      : note.fileUrl;
+
   const isPDF = note.fileUrl?.match(/\.pdf$/i);
-  const isImage = note.fileUrl?.match(/\.(jpeg|jpg|png|gif)$/i);
+  const isImage = note.fileUrl?.match(/\.(jpeg|jpg|png|gif|webp)$/i);
   const isOffice = note.fileUrl?.match(/\.(docx?|pptx?)$/i);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-2 sm:px-4">
       <div className="bg-white rounded-lg shadow-lg w-full sm:w-11/12 md:w-3/4 lg:w-2/3 xl:w-1/2 max-h-[90vh] flex flex-col">
-        
         {/* Header */}
         <div className="flex justify-between items-center p-3 sm:p-4 border-b">
           <h2 className="text-base sm:text-lg font-bold text-indigo-700 truncate">
             📖 {note.title || "Untitled Note"}
           </h2>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-red-500"
-          >
+          <button onClick={onClose} className="text-gray-500 hover:text-red-500">
             <FiX size={22} />
           </button>
         </div>

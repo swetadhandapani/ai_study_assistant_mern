@@ -1,3 +1,4 @@
+// frontend/src/pages/Profile.jsx
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/axiosInstance";
@@ -22,16 +23,18 @@ export default function Profile() {
     avatarName: "",
   });
 
-  // ---------- Normalize avatar ----------
-  const normalizeAvatar = (userObj) => {
-    if (!userObj) return null;
-    let avatar = userObj.avatar;
-    const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
-    if (avatar && !avatar.startsWith("http")) {
-      avatar = `${API_BASE}${avatar.startsWith("/") ? "" : "/"}${avatar}`;
-    }
-    return { ...userObj, avatar };
-  };
+  // ---------- Normalize avatar helper ----------
+ const normalizeAvatar = (userObj) => {
+  if (!userObj) return null;
+  let avatar = userObj.avatar;
+  if (avatar && !avatar.startsWith("http")) {
+    avatar = `${import.meta.env.VITE_API_URL || "http://localhost:5000"}${
+      avatar.startsWith("/") ? "/api/uploads" : "/api/uploads/"
+    }${avatar.split("/").pop()}`; // only filename
+  }
+  return { ...userObj, avatar };
+};
+
 
   // ---------- Load Profile ----------
   useEffect(() => {
@@ -378,7 +381,7 @@ export default function Profile() {
                       : URL.createObjectURL(formData.avatar)
                   }
                   alt="Preview"
-                  className="w-24 h-24 rounded-full mx-auto mt-2 object-cover"
+                  className="w-24 h-24 rounded-full object-cover mx-auto mt-2"
                 />
               )}
 

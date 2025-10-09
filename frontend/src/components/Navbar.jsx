@@ -13,19 +13,17 @@ export default function Navbar() {
   const mainMenuRef = useRef(null);
 
   // ✅ Normalize avatar URL
-const normalizeAvatar = (userObj) => {
-  if (!userObj) return null;
-  let avatar = userObj.avatar;
-  if (avatar && !avatar.startsWith("http")) {
-    const backendUrl = import.meta.env.VITE_API_URL.replace(/\/$/, "");
-    // ✅ Avoid double /api
-    avatar = avatar.startsWith("/api")
-      ? `${backendUrl}${avatar}`
-      : `${backendUrl}/api${avatar.startsWith("/") ? "" : "/"}${avatar}`;
-  }
-  return { ...userObj, avatar };
-};
-
+  const normalizeAvatar = (userObj) => {
+    if (!userObj) return null;
+    let avatar = userObj.avatar;
+    if (avatar && !avatar.startsWith("http")) {
+      const backendUrl = import.meta.env.VITE_API_URL.replace(/\/$/, "");
+      avatar = avatar.startsWith("/api")
+        ? `${backendUrl}${avatar}`
+        : `${backendUrl}/api${avatar.startsWith("/") ? "" : "/"}${avatar}`;
+    }
+    return { ...userObj, avatar };
+  };
 
   // ✅ Load user on mount
   useEffect(() => {

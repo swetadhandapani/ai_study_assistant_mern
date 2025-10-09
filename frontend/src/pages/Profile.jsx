@@ -28,7 +28,8 @@ export default function Profile() {
     if (!userObj) return null;
     let avatar = userObj.avatar;
     if (avatar && !avatar.startsWith("http")) {
-      avatar = `${import.meta.env.VITE_API_URL || "http://localhost:5000"}${
+      // POINT to backend API, not frontend port 3000
+      avatar = `${import.meta.env.VITE_API_URL}${
         avatar.startsWith("/") ? "" : "/"
       }${avatar}`;
     }
@@ -314,7 +315,9 @@ export default function Profile() {
                 <p className="mb-2">Scan this QR in Google Authenticator:</p>
                 <img src={qrCode} alt="QR Code" className="mx-auto mb-4" />
                 <p className="text-sm text-gray-600">Or enter manually:</p>
-                <p className="font-mono text-sm bg-gray-100 p-2 rounded">{secret}</p>
+                <p className="font-mono text-sm bg-gray-100 p-2 rounded">
+                  {secret}
+                </p>
                 <input
                   type="text"
                   value={totpCode}
@@ -349,14 +352,18 @@ export default function Profile() {
               <input
                 type="text"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
                 className="w-full p-3 border rounded-lg"
                 placeholder="Full Name"
               />
               <input
                 type="text"
                 value={formData.role}
-                onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, role: e.target.value })
+                }
                 className="w-full p-3 border rounded-lg"
                 placeholder="Role"
               />

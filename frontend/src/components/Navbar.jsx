@@ -17,7 +17,8 @@ export default function Navbar() {
     if (!userObj) return null;
     let avatar = userObj.avatar;
     if (avatar && !avatar.startsWith("http")) {
-      avatar = `${import.meta.env.VITE_API_URL || "http://localhost:5000"}${
+      // POINT to backend API, not frontend port 3000
+      avatar = `${import.meta.env.VITE_API_URL}${
         avatar.startsWith("/") ? "" : "/"
       }${avatar}`;
     }

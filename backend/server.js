@@ -47,13 +47,13 @@ app.use('/api/uploads', express.static(path.join(__dirname, 'uploads'), {
   },
 }));
 
-// ✅ Backend API routes
+//  Backend API routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/notes', require('./routes/notes'));
 app.use('/api/ai', require('./routes/ai'));
 app.use('/api/audio', require('./routes/audio'));
 
-// ✅ Serve React frontend (after running `npm run build` in frontend)
+//  Serve React frontend (after running `npm run build` in frontend)
 app.use(express.static(path.join(__dirname, '../frontend/build')));
 
 // ✅ React Router fallback (for Dashboard, Profile, Upload, etc.)

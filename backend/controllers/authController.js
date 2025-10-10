@@ -595,7 +595,7 @@ exports.updateProfile = async (req, res) => {
     if (role) updateData.role = role;
 
     if (req.file && req.file.filename) {
-      updateData.avatar = `/uploads/${req.file.filename}`;
+      updateData.avatar = `uploads/${req.file.filename}`;
     } else if (avatar === null || avatar === "null") {
       updateData.avatar = null;
     } else if (avatar) {

@@ -33,6 +33,8 @@ app.use(
 );
 
 app.use(express.json());
+// Serve uploads without /api
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 //  Serve uploaded files
 app.use('/api/uploads', express.static(path.join(__dirname, 'uploads'), {

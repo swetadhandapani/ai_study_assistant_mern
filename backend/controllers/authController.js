@@ -594,11 +594,15 @@ exports.updateProfile = async (req, res) => {
     if (name) updateData.name = name;
     if (role) updateData.role = role;
 
+    // Handle avatar update
     if (req.file && req.file.filename) {
+      // New file uploaded
       updateData.avatar = `/uploads/${req.file.filename}`;
     } else if (avatar === null || avatar === "null") {
+      // Remove avatar
       updateData.avatar = null;
     } else if (avatar) {
+      // Use provided URL/path
       updateData.avatar = avatar;
     }
 
@@ -608,10 +612,17 @@ exports.updateProfile = async (req, res) => {
 
     const userResponse = updatedUser.toObject();
 
+    // Construct full URL for avatar
     const BASE_URL =
       process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 5000}`;
+
     if (userResponse.avatar && !userResponse.avatar.startsWith("http")) {
-      userResponse.avatar = `${BASE_URL}/api${userResponse.avatar}`;
+      // Avoid duplicate /api
+      if (!userResponse.avatar.startsWith("/api")) {
+        userResponse.avatar = `${BASE_URL}/api${userResponse.avatar}`;
+      } else {
+        userResponse.avatar = `${BASE_URL}${userResponse.avatar}`;
+      }
     }
 
     res.json({
@@ -623,5 +634,6 @@ exports.updateProfile = async (req, res) => {
     res.status(500).json({ message: "Update failed", error: err.message });
   }
 };
+
 
 

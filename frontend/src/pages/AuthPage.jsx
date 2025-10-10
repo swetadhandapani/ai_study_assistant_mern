@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import api from "../api/axiosInstance";
 import { toast } from "react-toastify";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -40,55 +40,52 @@ export default function AuthPage() {
     return true;
   };
 
-  
   const handleAuth = async (e) => {
   e.preventDefault();
   if (!validateInputs()) return;
+
   try {
     const url = isRegister ? "/auth/register" : "/auth/login";
-    const res = await api.post(
-      url,
-      isRegister ? { name, email, password } : { email, password }
-    );
+    const res = await api.post(url, isRegister ? { name, email, password } : { email, password });
 
     if (isRegister) {
-      toast.info("✅ Registered! Please check your email to verify before logging in.");
-      setTimeout(() => (window.location.href = "/verify-info"), 1500);
-    } else {
-      // ✅ Step 1: If backend says 2FA is required
-      if (res.data.requires2FA) {
-        localStorage.setItem("pending2FAEmail", email); // save for Verify2FA.jsx
-        localStorage.setItem("pending2FAMethod", res.data.method); // "email" or "totp"
-        toast.info("🔐 Please enter the 2FA code sent to your email.");
-        setTimeout(() => (window.location.href = "/verify-2fa"), 1000);
-        return;
-      }
-
-      // ✅ Step 2: If user exists but not verified
-      if (!res.data.user?.isVerified) {
-        toast.error("⚠️ Please verify your email before logging in.");
-        return;
-      }
-
-      // ✅ Step 3: Store token temporarily
-      localStorage.setItem("token", res.data.token);
-
-      // ✅ Step 4: Always fetch a fresh profile (so user state is consistent)
-      const profileRes = await api.get("/auth/profile", {
-        headers: { Authorization: `Bearer ${res.data.token}` },
-      });
-
-      const freshUser = profileRes.data.user;
-      localStorage.setItem("user", JSON.stringify(freshUser));
-
-      // ✅ Step 5: Success → redirect
-      toast.success("🎉 Login successful!");
-      setTimeout(() => (window.location.href = "/upload"), 1200);
+      toast.info("✅ Registered! Check email to verify.");
+      setTimeout(() => navigate("/verify-info"), 1500);
+      return;
     }
+
+    // Login flow
+    if (res.data.requires2FA) {
+      localStorage.setItem("pending2FAEmail", email);
+      localStorage.setItem("pending2FAMethod", res.data.method);
+      toast.info("🔐 Enter 2FA code sent to email.");
+      setTimeout(() => navigate("/verify-2fa"), 1000);
+      return;
+    }
+
+    if (!res.data.user?.isVerified) {
+      toast.error("⚠️ Verify email before login.");
+      return;
+    }
+
+    localStorage.setItem("token", res.data.token);
+
+    // Fetch profile
+    const profileRes = await api.get("/auth/profile", {
+      headers: { Authorization: `Bearer ${res.data.token}` },
+    });
+
+    const freshUser = profileRes.data.user;
+    localStorage.setItem("user", JSON.stringify(freshUser));
+    window.dispatchEvent(new Event("userUpdated"));
+
+    toast.success("🎉 Login successful!");
+    setTimeout(() => navigate("/upload"), 1200);
   } catch (err) {
     toast.error(err.response?.data?.message || err.message);
   }
 };
+
 
 
   return (

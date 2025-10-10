@@ -83,6 +83,7 @@ export default function AuthPage() {
 
       // ✅ Step 5: Success → redirect
       toast.success("🎉 Login successful!");
+      window.dispatchEvent(new Event("userUpdated"));
       setTimeout(() => (window.location.href = "/upload"), 1200);
     }
   } catch (err) {

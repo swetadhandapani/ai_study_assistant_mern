@@ -12,15 +12,17 @@ export default function Navbar() {
   const userMenuRef = useRef(null);
   const mainMenuRef = useRef(null);
 
-  // ✅ Normalize avatar URL
   const normalizeAvatar = (userObj) => {
     if (!userObj) return null;
     let avatar = userObj.avatar;
     if (avatar && !avatar.startsWith("http")) {
       const backendUrl = import.meta.env.VITE_API_URL.replace(/\/$/, "");
-      avatar = avatar.startsWith("/api")
-        ? `${backendUrl}${avatar}`
-        : `${backendUrl}/api${avatar.startsWith("/") ? "" : "/"}${avatar}`;
+      // ✅ Only add /api if not already included
+      if (avatar.startsWith("/api")) {
+        avatar = `${backendUrl}${avatar}`;
+      } else {
+        avatar = `${backendUrl}/${avatar.startsWith("/") ? "" : "/"}${avatar}`;
+      }
     }
     return { ...userObj, avatar };
   };

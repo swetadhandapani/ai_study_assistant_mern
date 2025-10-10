@@ -11,6 +11,8 @@ export default function AuthPage() {
   const [name, setName] = useState("");
   const [isRegister, setIsRegister] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
+
 
   // 🔑 Check if user just verified via email link
   useEffect(() => {

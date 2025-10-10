@@ -595,7 +595,7 @@ exports.updateProfile = async (req, res) => {
     if (role) updateData.role = role;
 
     if (req.file && req.file.filename) {
-      updateData.avatar = `/api/uploads/${req.file.filename}`;
+      updateData.avatar = `/uploads/${req.file.filename}`;
     } else if (avatar === null || avatar === "null") {
       updateData.avatar = null;
     } else if (avatar) {
@@ -611,7 +611,7 @@ exports.updateProfile = async (req, res) => {
     const BASE_URL =
       process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 5000}`;
     if (userResponse.avatar && !userResponse.avatar.startsWith("http")) {
-      userResponse.avatar = `${BASE_URL}${userResponse.avatar}`;
+      userResponse.avatar = `${BASE_URL}/api${userResponse.avatar}`;
     }
 
     res.json({

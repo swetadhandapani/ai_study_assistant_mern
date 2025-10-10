@@ -24,20 +24,21 @@ export default function Profile() {
   });
 
   // ---------- Normalize avatar helper ----------
-  const normalizeAvatar = (userObj) => {
-    if (!userObj) return null;
-    let avatar = userObj.avatar;
-    if (avatar && !avatar.startsWith("http")) {
-      const backendUrl = import.meta.env.VITE_API_URL.replace(/\/$/, "");
-      // ✅ Only add /api if not already included
-      if (avatar.startsWith("/api")) {
-        avatar = `${backendUrl}${avatar}`;
-      } else {
-        avatar = `${backendUrl}/${avatar.startsWith("/") ? "" : "/"}${avatar}`;
-      }
+ const normalizeAvatar = (userObj) => {
+  if (!userObj) return null;
+  let avatar = userObj.avatar;
+  if (avatar && !avatar.startsWith("http")) {
+    const backendUrl = import.meta.env.VITE_API_URL.replace(/\/$/, "");
+    // Only prepend /api if not already included
+    if (!avatar.startsWith("/api")) {
+      avatar = `${backendUrl}/api${avatar.startsWith("/") ? "" : "/"}${avatar}`;
+    } else {
+      avatar = `${backendUrl}${avatar}`;
     }
-    return { ...userObj, avatar };
-  };
+  }
+  return { ...userObj, avatar };
+};
+
 
   // ---------- Load Profile ----------
   useEffect(() => {

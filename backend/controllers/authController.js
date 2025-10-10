@@ -617,12 +617,9 @@ exports.updateProfile = async (req, res) => {
       process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 5000}`;
 
     if (userResponse.avatar && !userResponse.avatar.startsWith("http")) {
-      // Avoid duplicate /api
-      if (!userResponse.avatar.startsWith("/api")) {
-        userResponse.avatar = `${BASE_URL}/api${userResponse.avatar}`;
-      } else {
-        userResponse.avatar = `${BASE_URL}${userResponse.avatar}`;
-      }
+      // DO NOT prepend /api
+      userResponse.avatar = `${BASE_URL}${userResponse.avatar}`;
+      // frontend will handle VITE_API_URL + /api consistently
     }
 
     res.json({
@@ -634,6 +631,3 @@ exports.updateProfile = async (req, res) => {
     res.status(500).json({ message: "Update failed", error: err.message });
   }
 };
-
-
-

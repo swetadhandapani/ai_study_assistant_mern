@@ -590,32 +590,36 @@ exports.updateProfile = async (req, res) => {
   try {
     const { name, role, avatar } = req.body;
     const userId = req.user.id;
-    const BASE_URL =
-      process.env.BACKEND_URL;
+    const BASE_URL = process.env.BACKEND_URL;
 
     const updateData = {};
     if (name) updateData.name = name;
     if (role) updateData.role = role;
 
+    // ✅ Store only relative path
     if (req.file && req.file.filename) {
-      updateData.avatar = `${BASE_URL}/api/uploads/${req.file.filename}`;
+      updateData.avatar = `/api/uploads/${req.file.filename}`;
     } else if (avatar === null || avatar === "null") {
       updateData.avatar = null;
     } else if (avatar) {
-      updateData.avatar = avatar;
+      updateData.avatar = avatar; // keep existing
     }
 
     const updatedUser = await User.findByIdAndUpdate(userId, updateData, {
       new: true,
     }).select("-password");
 
-    // Ensure avatar has full URL
+    // ✅ Prefix with BASE_URL before sending response
+    let fullAvatar = null;
     if (updatedUser.avatar && !updatedUser.avatar.startsWith("http")) {
-      updatedUser.avatar = `${BASE_URL}${updatedUser.avatar}`;
+      fullAvatar = `${BASE_URL}${updatedUser.avatar}`;
+    } else {
+      fullAvatar = updatedUser.avatar;
     }
+
     res.json({
       message: "Profile updated successfully",
-      user: formatUser(updatedUser),
+      user: { ...formatUser(updatedUser), avatar: fullAvatar },
     });
   } catch (err) {
     console.error("Update profile error:", err);

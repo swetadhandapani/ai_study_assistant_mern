@@ -15,12 +15,13 @@ export default function Navbar() {
   // ✅ Normalize avatar URL
   const normalizeAvatar = (userObj) => {
     if (!userObj) return null;
+
     let avatar = userObj.avatar;
+
     if (avatar && !avatar.startsWith("http")) {
-      avatar = `${import.meta.env.VITE_API_URL || "http://localhost:5000"}${
-        avatar.startsWith("/") ? "" : "/"
-      }${avatar}`;
+      avatar = `${import.meta.env.VITE_BASE_URL}${avatar}`;
     }
+
     return { ...userObj, avatar };
   };
 

@@ -12,7 +12,8 @@ export default function Navbar() {
   const userMenuRef = useRef(null);
   const mainMenuRef = useRef(null);
 
-const normalizeAvatar = (userObj) => {
+  // ✅ Normalize avatar URL
+   const normalizeAvatar = (userObj) => {
   if (!userObj) return null;
   let avatar = userObj.avatar;
 
@@ -33,7 +34,6 @@ const normalizeAvatar = (userObj) => {
 
   return { ...userObj, avatar };
 };
-
 
 
   // ✅ Load user on mount

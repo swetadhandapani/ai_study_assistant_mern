@@ -585,24 +585,23 @@ exports.getProfile = async (req, res) => {
 /**
  * UPDATE PROFILE
  */
+
 exports.updateProfile = async (req, res) => {
   try {
     const { name, role, avatar } = req.body;
     const userId = req.user.id;
+    const BASE_URL =
+      process.env.CLIENT_URL;
 
     const updateData = {};
     if (name) updateData.name = name;
     if (role) updateData.role = role;
 
-    // Handle avatar update
     if (req.file && req.file.filename) {
-      // New file uploaded
-      updateData.avatar = `/uploads/${req.file.filename}`;
+      updateData.avatar = `${BASE_URL}/api/uploads/${req.file.filename}`;
     } else if (avatar === null || avatar === "null") {
-      // Remove avatar
       updateData.avatar = null;
     } else if (avatar) {
-      // Use provided URL/path
       updateData.avatar = avatar;
     }
 
@@ -610,21 +609,13 @@ exports.updateProfile = async (req, res) => {
       new: true,
     }).select("-password");
 
-    const userResponse = updatedUser.toObject();
-
-    // Construct full URL for avatar
-    const BASE_URL =
-      process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 5000}`;
-
-    if (userResponse.avatar && !userResponse.avatar.startsWith("http")) {
-      // DO NOT prepend /api
-      userResponse.avatar = `${BASE_URL}${userResponse.avatar}`;
-      // frontend will handle VITE_API_URL + /api consistently
+    // Ensure avatar has full URL
+    if (updatedUser.avatar && !updatedUser.avatar.startsWith("http")) {
+      updatedUser.avatar = `${BASE_URL}${updatedUser.avatar}`;
     }
-
     res.json({
       message: "Profile updated successfully",
-      user: formatUser(userResponse),
+      user: formatUser(updatedUser),
     });
   } catch (err) {
     console.error("Update profile error:", err);

@@ -24,29 +24,16 @@ export default function Profile() {
   });
 
   // ---------- Normalize avatar helper ----------
- const normalizeAvatar = (userObj) => {
-  if (!userObj) return null;
-  let avatar = userObj.avatar;
-
-  if (!avatar) return null;
-
-  // If it's already a full URL, do nothing
-  if (avatar.startsWith("http")) return { ...userObj, avatar };
-
-  // If avatar already starts with /api, just prepend BASE
-  const backendUrl = import.meta.env.VITE_API_URL.replace(/\/$/, ""); // http://54.198.181.106:5000/api
-  if (avatar.startsWith("/api")) {
-    avatar = `${backendUrl}${avatar.replace(/^\/api/, "")}`; 
-    // Removes /api from avatar path, so final URL = http://54.198.181.106:5000/api/uploads/...
-  } else {
-    // avatar starts with /uploads
-    avatar = `${backendUrl}${avatar}`; // => http://54.198.181.106:5000/api/uploads/...
-  }
-
-  return { ...userObj, avatar };
-};
-
-
+  const normalizeAvatar = (userObj) => {
+    if (!userObj) return null;
+    let avatar = userObj.avatar;
+    if (avatar && !avatar.startsWith("http")) {
+      avatar = `${import.meta.env.VITE_API_URL || "http://localhost:5000"}${
+        avatar.startsWith("/") ? "" : "/"
+      }${avatar}`;
+    }
+    return { ...userObj, avatar };
+  };
 
   // ---------- Load Profile ----------
   useEffect(() => {
@@ -327,9 +314,7 @@ export default function Profile() {
                 <p className="mb-2">Scan this QR in Google Authenticator:</p>
                 <img src={qrCode} alt="QR Code" className="mx-auto mb-4" />
                 <p className="text-sm text-gray-600">Or enter manually:</p>
-                <p className="font-mono text-sm bg-gray-100 p-2 rounded">
-                  {secret}
-                </p>
+                <p className="font-mono text-sm bg-gray-100 p-2 rounded">{secret}</p>
                 <input
                   type="text"
                   value={totpCode}
@@ -364,18 +349,14 @@ export default function Profile() {
               <input
                 type="text"
                 value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 className="w-full p-3 border rounded-lg"
                 placeholder="Full Name"
               />
               <input
                 type="text"
                 value={formData.role}
-                onChange={(e) =>
-                  setFormData({ ...formData, role: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                 className="w-full p-3 border rounded-lg"
                 placeholder="Role"
               />

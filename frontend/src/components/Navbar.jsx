@@ -13,28 +13,16 @@ export default function Navbar() {
   const mainMenuRef = useRef(null);
 
   // ✅ Normalize avatar URL
-   const normalizeAvatar = (userObj) => {
-  if (!userObj) return null;
-  let avatar = userObj.avatar;
-
-  if (!avatar) return null;
-
-  // If it's already a full URL, do nothing
-  if (avatar.startsWith("http")) return { ...userObj, avatar };
-
-  // If avatar already starts with /api, just prepend BASE
-  const backendUrl = import.meta.env.VITE_API_URL.replace(/\/$/, ""); // http://54.198.181.106:5000/api
-  if (avatar.startsWith("/api")) {
-    avatar = `${backendUrl}${avatar.replace(/^\/api/, "")}`; 
-    // Removes /api from avatar path, so final URL = http://54.198.181.106:5000/api/uploads/...
-  } else {
-    // avatar starts with /uploads
-    avatar = `${backendUrl}${avatar}`; // => http://54.198.181.106:5000/api/uploads/...
-  }
-
-  return { ...userObj, avatar };
-};
-
+  const normalizeAvatar = (userObj) => {
+    if (!userObj) return null;
+    let avatar = userObj.avatar;
+    if (avatar && !avatar.startsWith("http")) {
+      avatar = `${import.meta.env.VITE_API_URL || "http://localhost:5000"}${
+        avatar.startsWith("/") ? "" : "/"
+      }${avatar}`;
+    }
+    return { ...userObj, avatar };
+  };
 
   // ✅ Load user on mount
   useEffect(() => {

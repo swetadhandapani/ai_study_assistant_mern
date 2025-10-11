@@ -591,7 +591,7 @@ exports.updateProfile = async (req, res) => {
     const { name, role, avatar } = req.body;
     const userId = req.user.id;
     const BASE_URL =
-      process.env.CLIENT_URL;
+      process.env.BACKEND_URL;
 
     const updateData = {};
     if (name) updateData.name = name;

@@ -35,7 +35,7 @@ export default function SummaryCard({ summaries = [] }) {
   if (currentGroup) grouped.push(currentGroup);
 
   // Function to copy entire summary text
-  const handleCopy = () => {
+  const handleCopy = async () => {
     const fullText = grouped
       .map(
         (section) =>
@@ -43,14 +43,32 @@ export default function SummaryCard({ summaries = [] }) {
       )
       .join("\n\n");
 
-    navigator.clipboard.writeText(fullText);
-    toast.success("Summary copied to clipboard!");
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(fullText);
+        toast.success("Summary copied to clipboard!");
+      } else {
+        // Fallback for HTTP or unsupported browsers
+        const textArea = document.createElement("textarea");
+        textArea.value = fullText;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand("copy"); // Works on HTTP too
+        document.body.removeChild(textArea);
+        toast.success("Summary copied (fallback)!");
+      }
+    } catch (err) {
+      console.error("Clipboard copy failed:", err);
+      toast.error("Failed to copy summary!");
+    }
   };
 
   return (
     <div className="p-4 md:p-6 bg-white rounded-lg shadow-md border border-gray-200 max-w-full md:max-w-3xl mx-auto">
       <div className="flex items-center justify-between mb-3 md:mb-4">
-        <h2 className="text-lg md:text-xl font-semibold text-gray-800">📄 Summary</h2>
+        <h2 className="text-lg md:text-xl font-semibold text-gray-800">
+          📄 Summary
+        </h2>
         <button
           onClick={handleCopy}
           className="px-3 py-1 rounded bg-indigo-600 text-white text-sm hover:bg-indigo-700"

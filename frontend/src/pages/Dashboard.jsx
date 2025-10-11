@@ -45,7 +45,11 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (cardRef.current)
-      gsap.fromTo(cardRef.current, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6 });
+      gsap.fromTo(
+        cardRef.current,
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.6 }
+      );
   }, [material, viewMode]);
 
   useEffect(() => {
@@ -189,7 +193,7 @@ export default function Dashboard() {
     try {
       const res = await api.post(`/ai/markdown/${current._id}`);
       setMarkdown(res.data.markdown || "");
-      setOpenMarkdown(true); 
+      setOpenMarkdown(true);
       setViewMode("markdown");
       toast.success(" Markdown generated!");
     } catch {
@@ -210,6 +214,41 @@ export default function Dashboard() {
       setOpenTranslation(true);
     } catch {
       toast.error("⚠️ Failed to translate transcript");
+    }
+  };
+
+  // Safe copy function (works for both http & https)
+  const safeCopyToClipboard = async (text) => {
+    if (navigator.share) {
+      try {
+        await navigator.share({ text });
+        return true;
+      } catch {
+        // user cancelled or failed — continue fallback
+      }
+    }
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      try {
+        await navigator.clipboard.writeText(text);
+        return true;
+      } catch {
+        // fallback below
+      }
+    }
+
+    // Fallback for HTTP or old browsers
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    document.body.appendChild(textArea);
+    textArea.select();
+    try {
+      document.execCommand("copy");
+      return true;
+    } catch {
+      return false;
+    } finally {
+      document.body.removeChild(textArea);
     }
   };
 
@@ -451,8 +490,6 @@ export default function Dashboard() {
               )}
 
               {chatOpen && <Chatbot note={selected} />}
-
-             
             </div>
           </>
         )}
@@ -591,20 +628,20 @@ export default function Dashboard() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={async () => {
-                    try {
-                      await navigator.clipboard.writeText(
-                        selectedAudio.transcription ||
-                          "No transcript available."
-                      );
-                      toast.success("📋 Transcript copied to clipboard!");
-                    } catch {
-                      toast.error("⚠️ Failed to copy transcript");
-                    }
+                    const success = await safeCopyToClipboard(
+                      selectedAudio.transcription || "No transcript available."
+                    );
+                    toast[success ? "success" : "error"](
+                      success
+                        ? "📋 Transcript copied to clipboard!"
+                        : "⚠️ Failed to copy transcript"
+                    );
                   }}
                   className="px-3 py-1 rounded bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-medium"
                 >
                   Copy
                 </button>
+
                 <button
                   onClick={() => setOpenTranscript(false)}
                   className="px-3 py-1 rounded bg-gray-100 hover:bg-gray-200"
@@ -660,14 +697,14 @@ export default function Dashboard() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={async () => {
-                    try {
-                      await navigator.clipboard.writeText(
-                        translationText || "No translation available."
-                      );
-                      toast.success("📋 Translation copied to clipboard!");
-                    } catch {
-                      toast.error("⚠️ Failed to copy translation");
-                    }
+                    const success = await safeCopyToClipboard(
+                      translationText || "No translation available."
+                    );
+                    toast[success ? "success" : "error"](
+                      success
+                        ? "📋 Translation copied to clipboard!"
+                        : "⚠️ Failed to copy translation"
+                    );
                   }}
                   className="px-3 py-1 rounded bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-medium"
                 >
@@ -728,12 +765,12 @@ export default function Dashboard() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={async () => {
-                    try {
-                      await navigator.clipboard.writeText(markdown);
-                      toast.success(" Markdown copied to clipboard!");
-                    } catch {
-                      toast.error("⚠️ Failed to copy markdown");
-                    }
+                    const success = await safeCopyToClipboard(markdown || "");
+                    toast[success ? "success" : "error"](
+                      success
+                        ? "📋 Markdown copied to clipboard!"
+                        : "⚠️ Failed to copy markdown"
+                    );
                   }}
                   className="px-3 py-1 rounded bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-medium"
                 >

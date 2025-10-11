@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 import { FaShareAlt } from "react-icons/fa";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function Quiz({ quizzes = [] }) {
   const [i, setI] = useState(0);
   const [score, setScore] = useState(0);
   const [done, setDone] = useState(false);
   const [answers, setAnswers] = useState([]);
-  const [showAnswers, setShowAnswers] = useState(false); 
+  const [showAnswers, setShowAnswers] = useState(false);
 
   if (!quizzes.length) return <div>No quizzes</div>;
 
@@ -23,21 +25,40 @@ export default function Quiz({ quizzes = [] }) {
   const handleShare = async () => {
     if (!done) return;
 
-    let text = `📘 Quiz Results\nScore: ${score} / ${quizzes.length}\n\n`;
+    const text =
+      `📘 Quiz Results\nScore: ${score} / ${quizzes.length}\n\n` +
+      quizzes
+        .map((q, idx) => {
+          const correct = q.options[q.answerIndex];
+          const chosen = q.options[answers[idx]];
+          return `${idx + 1}. ${q.question}\n✅ Correct: ${correct}\n${
+            answers[idx] === q.answerIndex
+              ? `🎯 Your Answer: ${chosen} (Correct)\n\n`
+              : `❌ Your Answer: ${chosen}\n\n`
+          }`;
+        })
+        .join("");
 
-    quizzes.forEach((q, idx) => {
-      text += `${idx + 1}. ${q.question}\n`;
-      text += `✅ Correct: ${q.options[q.answerIndex]}\n`;
-      text += answers[idx] === q.answerIndex
-        ? `🎯 Your Answer: ${q.options[answers[idx]]} (Correct)\n\n`
-        : `❌ Your Answer: ${q.options[answers[idx]]}\n\n`;
-    });
-
-    if (navigator.share) {
-      await navigator.share({ title: "Quiz Results", text });
-    } else {
-      await navigator.clipboard.writeText(text);
-      alert("Results copied to clipboard!");
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: "Quiz Results", text });
+        toast.success("Quiz results shared successfully!");
+      } else if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(text);
+        toast.success("Quiz results copied to clipboard!");
+      } else {
+        // Fallback for HTTP or unsupported browsers
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand("copy"); // Works on HTTP too
+        document.body.removeChild(textArea);
+        toast.success("Quiz results copied using fallback!");
+      }
+    } catch (err) {
+      console.error("Share or copy failed:", err);
+      toast.error("Unable to share or copy the results.");
     }
   };
 
@@ -47,11 +68,7 @@ export default function Quiz({ quizzes = [] }) {
       <button
         onClick={handleShare}
         disabled={!done}
-        title={
-          done
-            ? "Share Results"
-            : "Complete the quiz before sharing"
-        }
+        title={done ? "Share Results" : "Complete the quiz before sharing"}
         className={`absolute top-2 right-2 p-2 rounded-full ${
           done
             ? "bg-indigo-600 text-white hover:bg-indigo-700"
@@ -66,7 +83,9 @@ export default function Quiz({ quizzes = [] }) {
           <div className="text-xs md:text-sm text-gray-500 mb-2">
             Q {i + 1} / {quizzes.length}
           </div>
-          <div className="font-semibold text-base md:text-lg mb-3">{current.question}</div>
+          <div className="font-semibold text-base md:text-lg mb-3">
+            {current.question}
+          </div>
           <div className="grid gap-2">
             {current.options.map((opt, idx) => (
               <button
@@ -97,15 +116,24 @@ export default function Quiz({ quizzes = [] }) {
             <ul className="mt-4 space-y-3 text-sm md:text-base">
               {quizzes.map((q, idx) => (
                 <li key={idx} className="p-3 md:p-4 border rounded bg-gray-50">
-                  <p className="font-medium">{idx + 1}. {q.question}</p>
+                  <p className="font-medium">
+                    {idx + 1}. {q.question}
+                  </p>
                   <p className="text-xs md:text-sm">
-                    ✅ Correct: <span className="font-semibold text-green-600">{q.options[q.answerIndex]}</span>
+                    ✅ Correct:{" "}
+                    <span className="font-semibold text-green-600">
+                      {q.options[q.answerIndex]}
+                    </span>
                   </p>
                   <p className="text-xs md:text-sm">
                     {answers[idx] === q.answerIndex ? (
-                      <span className="text-green-600">You chose the right answer 🎯</span>
+                      <span className="text-green-600">
+                        You chose the right answer 🎯
+                      </span>
                     ) : (
-                      <span className="text-red-500">❌ Your Answer: {q.options[answers[idx]]}</span>
+                      <span className="text-red-500">
+                        ❌ Your Answer: {q.options[answers[idx]]}
+                      </span>
                     )}
                   </p>
                 </li>

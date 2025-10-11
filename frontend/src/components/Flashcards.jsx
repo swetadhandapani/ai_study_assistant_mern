@@ -1,6 +1,8 @@
 import React, { useState } from "react";
-import { Share2 } from "lucide-react"; 
+import { Share2 } from "lucide-react";
 import gsap from "gsap";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function Flashcards({ cards = [] }) {
   const [index, setIndex] = useState(0);
@@ -13,27 +15,29 @@ export default function Flashcards({ cards = [] }) {
 
     const allContent = cards
       .map(
-        (c, i) =>
-          `Card ${i + 1}:\nQ: ${c.question}\nA: ${c.answer || "—"}\n`
+        (c, i) => `Card ${i + 1}:\nQ: ${c.question}\nA: ${c.answer || "—"}\n`
       )
       .join("\n");
 
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: "Flashcards",
-          text: allContent,
-        });
-      } catch (err) {
-        console.error("Share failed:", err);
-      }
-    } else {
-      try {
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: "Flashcards", text: allContent });
+        toast.success("Flashcards shared successfully!");
+      } else if (navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(allContent);
-        alert("All flashcards copied to clipboard!");
-      } catch (err) {
-        console.error("Clipboard copy failed:", err);
+        toast.success("All flashcards copied to clipboard!");
+      } else {
+        const textArea = document.createElement("textarea");
+        textArea.value = allContent;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+        toast.success("Flashcards copied using fallback!");
       }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to share or copy flashcards.");
     }
   };
 
